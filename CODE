@@ -1,0 +1,171 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+void input(char *buffer, int size) {
+    fgets(buffer, size, stdin);
+    buffer[strcspn(buffer, "\n")] = '\0'; // remove newline
+}
+
+void createFile();
+void writeToFile();
+void readFile();
+void appendToFile();
+void deleteFile();
+void editFile();
+
+int main() {
+    int choice;
+
+    while (1) {
+        printf("\n========== NOTEPAD APPLICATION ==========\n");
+        printf("1. Create New File\n");
+        printf("2. Write to File\n");
+        printf("3. Read Existing File\n");
+        printf("4. Append Text to File\n");
+        printf("5. Delete a File\n");
+        printf("6. Edit a File\n");
+        printf("7. Exit\n");
+        printf("-----------------------------------------\n");
+        printf("Enter your choice: ");
+
+        scanf("%d", &choice);
+        getchar(); // clear leftover newline
+
+        switch (choice) {
+        case 1: createFile(); break;
+        case 2: writeToFile(); break;
+        case 3: readFile(); break;
+        case 4: appendToFile(); break;
+        case 5: deleteFile(); break;
+        case 6: editFile(); break;
+        case 7:
+            printf("\nThank you! Exiting Notepad...\n");
+            exit(0);
+        default:
+            printf("\nInvalid Choice! Try again.\n");
+        }
+    }
+}
+
+void createFile() {
+    char filename[50];
+    printf("\nEnter file name to create: ");
+    input(filename, sizeof(filename));
+
+    FILE *fp = fopen(filename, "w");
+    if (!fp) {
+        printf("\nError creating file!\n");
+        return;
+    }
+
+    printf("\nFile '%s' created successfully.\n", filename);
+    fclose(fp);
+}
+
+void writeToFile() {
+    char filename[50], text[1000];
+    printf("\nEnter file name to write: ");
+    input(filename, sizeof(filename));
+
+    FILE *fp = fopen(filename, "w");
+    if (!fp) {
+        printf("\nFile not found!\n");
+        return;
+    }
+
+    printf("\nEnter text (type 'END' on a new line to stop):\n");
+
+    while (1) {
+        input(text, sizeof(text));
+        if (strcmp(text, "END") == 0) break;
+        fprintf(fp, "%s\n", text);
+    }
+
+    fclose(fp);
+    printf("\nText written successfully!\n");
+}
+
+void readFile() {
+    char filename[50], ch;
+    printf("\nEnter file name to read: ");
+    input(filename, sizeof(filename));
+
+    FILE *fp = fopen(filename, "r");
+    if (!fp) {
+        printf("\nFile not found!\n");
+        return;
+    }
+
+    printf("\n----- File Content -----\n");
+    while ((ch = fgetc(fp)) != EOF)
+        putchar(ch);
+
+    fclose(fp);
+    printf("\n------------------------\n");
+}
+
+void appendToFile() {
+    char filename[50], text[500];
+    printf("\nEnter file name to append: ");
+    input(filename, sizeof(filename));
+
+    FILE *fp = fopen(filename, "a");
+    if (!fp) {
+        printf("\nFile not found!\n");
+        return;
+    }
+
+    printf("\nEnter text to append (type 'END' to finish):\n");
+
+    while (1) {
+        input(text, sizeof(text));
+        if (strcmp(text, "END") == 0) break;
+        fprintf(fp, "%s\n", text);
+    }
+
+    fclose(fp);
+    printf("\nText appended successfully!\n");
+}
+
+void deleteFile() {
+    char filename[50];
+    printf("\nEnter file name to delete: ");
+    input(filename, sizeof(filename));
+
+    if (remove(filename) == 0)
+        printf("\nFile deleted successfully!\n");
+    else
+        printf("\nUnable to delete file.\n");
+}
+
+void editFile() {
+    char filename[50], text[1000], ch;
+
+    printf("\nEnter file name to edit: ");
+    input(filename, sizeof(filename));
+
+    FILE *fp = fopen(filename, "r");
+    if (!fp) {
+        printf("\nFile not found!\n");
+        return;
+    }
+
+    printf("\n----- Current Content -----\n");
+    while ((ch = fgetc(fp)) != EOF)
+        putchar(ch);
+    fclose(fp);
+
+    printf("\n----------------------------\n");
+    printf("Enter new updated text (type 'END' to finish):\n");
+
+    fp = fopen(filename, "w");
+    while (1) {
+        input(text, sizeof(text));
+        if (strcmp(text, "END") == 0) break;
+        fprintf(fp, "%s\n", text);
+    }
+    fclose(fp);
+
+    printf("\nFile updated successfully!\n");
+}
